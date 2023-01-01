@@ -73,4 +73,16 @@ public class Controller : NetworkBehaviour
     {
         rigitbody.velocity = moving;
     }
+
+    public override void OnNetworkSpawn()
+    {
+        //base.OnNetworkSpawn();
+        Debug.Log("Network Spawn");
+        if(IsServer)
+        {
+            var x = UnityEngine.Random.Range(-2, 2);
+            var y = UnityEngine.Random.Range(1, 3);
+            transform.position = new Vector3(x, y, transform.position.z);
+        }
+    }
 }
