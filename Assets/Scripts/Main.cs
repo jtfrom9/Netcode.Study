@@ -9,6 +9,8 @@ using UniRx.Triggers;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using TMPro;
+using UnityEngine.Assertions;
+using Unity.VisualScripting;
 
 public class Main : MonoBehaviour
 {
@@ -16,19 +18,77 @@ public class Main : MonoBehaviour
     [SerializeField] Button? asClientButton;
     [SerializeField] TMP_InputField? ipaddress;
 
+    [SerializeField] Button? exitButton;
+
+    string? addr = null;
+
+    void initAddress()
+    {
+        if (PlayerPrefs.HasKey("address"))
+        {
+            this.addr = PlayerPrefs.GetString("address");
+        } else
+        {
+            this.addr = "127.0.0.1";
+            saveAddress();
+        }
+    }
+
+    void saveAddress()
+    {
+        if (addr != null)
+        {
+            PlayerPrefs.SetString("address", this.addr);
+            PlayerPrefs.Save();
+        }
+    }
+
+    private void Awake()
+    {
+        initAddress();
+        if (ipaddress != null)
+        {
+            ipaddress.text = this.addr ?? "";
+        }
+    }
+
     void Start()
     {
-        asHostButton?.OnClickAsObservable().Subscribe(_ => {
+        if(asClientButton==null || asHostButton == null || ipaddress==null || exitButton==null)
+        {
+            Debug.LogError("Invalid Main Setup");
+            return;
+        }
+        
+        asHostButton.OnClickAsObservable().Subscribe(_ => {
             NetworkManager.Singleton.StartHost();
+            asClientButton.interactable = false;
         }).AddTo(this);
 
-        asClientButton?.OnClickAsObservable().Subscribe(_ => {
+        ipaddress.ObserveEveryValueChanged(i => i.text).Subscribe(text => {
+            this.addr = text;
+            this.asClientButton.interactable = !string.IsNullOrEmpty(this.addr);
+        }).AddTo(this);
 
-            var transport = NetworkManager.Singleton.NetworkConfig.NetworkTransport as UnityTransport;
-            if(transport!=null && ipaddress!=null) {
-                transport.SetConnectionData(ipaddress.text, 7777);
-            }
-            NetworkManager.Singleton.StartClient();
+        var transport = NetworkManager.Singleton.NetworkConfig.NetworkTransport as UnityTransport;
+        if (transport == null || this.addr==null)
+        {
+            asClientButton.interactable = false;
+        }
+        else {
+            asClientButton.OnClickAsObservable().Subscribe(_ =>
+            {
+                asHostButton.interactable = false;
+                transport.SetConnectionData(this.addr, 7777);
+                NetworkManager.Singleton.StartClient();
+                saveAddress();
+            }).AddTo(this);            
+        }
+
+        exitButton.OnClickAsObservable().Subscribe(_ => {
+            NetworkManager.Singleton.Shutdown();
+            asClientButton.interactable = true;
+            asHostButton.interactable = true;
         }).AddTo(this);
     }
 }
