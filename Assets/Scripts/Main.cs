@@ -12,14 +12,17 @@ using TMPro;
 using UnityEngine.Assertions;
 using Unity.VisualScripting;
 
-public class Main : MonoBehaviour
+public class Main : NetworkBehaviour
 {
     [SerializeField] Button? asHostButton;
     [SerializeField] Button? asClientButton;
     [SerializeField] TMP_InputField? ipaddress;
 
     [SerializeField] Button? exitButton;
+    [SerializeField] Button? sphereButton;
     [SerializeField] GameObject? joystick;
+
+    [SerializeField] NetworkObject? sphereObject;
 
     string? addr = null;
 
@@ -55,7 +58,9 @@ public class Main : MonoBehaviour
 
     void Start()
     {
-        if(asClientButton==null || asHostButton == null || ipaddress==null || exitButton==null || joystick==null)
+        if (asClientButton == null || asHostButton == null || ipaddress == null || exitButton == null
+            || sphereButton == null
+            || joystick == null)
         {
             Debug.LogError("Invalid Main Setup");
             return;
@@ -95,5 +100,15 @@ public class Main : MonoBehaviour
             asClientButton.interactable = true;
             asHostButton.interactable = true;
         }).AddTo(this);
+
+        sphereButton.OnClickAsObservable().Subscribe(_ => {
+            CreateSphereServerRpc();
+        }).AddTo(this);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void CreateSphereServerRpc()
+    {
+        Instantiate(sphereObject)?.Spawn();
     }
 }

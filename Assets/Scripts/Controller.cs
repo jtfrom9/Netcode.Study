@@ -96,8 +96,6 @@ public class Controller : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        //base.OnNetworkSpawn();
-        Debug.Log("Network Spawn");
         if(IsServer)
         {
             var x = UnityEngine.Random.Range(-2, 2);
