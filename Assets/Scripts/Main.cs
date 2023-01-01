@@ -19,6 +19,7 @@ public class Main : MonoBehaviour
     [SerializeField] TMP_InputField? ipaddress;
 
     [SerializeField] Button? exitButton;
+    [SerializeField] GameObject? joystick;
 
     string? addr = null;
 
@@ -54,12 +55,16 @@ public class Main : MonoBehaviour
 
     void Start()
     {
-        if(asClientButton==null || asHostButton == null || ipaddress==null || exitButton==null)
+        if(asClientButton==null || asHostButton == null || ipaddress==null || exitButton==null || joystick==null)
         {
             Debug.LogError("Invalid Main Setup");
             return;
         }
-        
+
+#if !UNITY_ANDROID
+        joystick.SetActive(false);
+#endif
+
         asHostButton.OnClickAsObservable().Subscribe(_ => {
             NetworkManager.Singleton.StartHost();
             asClientButton.interactable = false;

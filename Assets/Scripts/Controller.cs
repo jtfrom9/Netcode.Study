@@ -9,6 +9,16 @@ public class Controller : NetworkBehaviour
     Vector3 moving, latestPos;
     float speed;
 
+    Joystick joystick;
+
+    private void Awake()
+    {
+#if UNITY_ANDROID
+        joystick = GameObject.FindObjectOfType<Joystick>();
+#endif
+        Debug.Log(joystick);
+    }
+
     void Start()
     {
         rigitbody = GetComponent<Rigidbody>();
@@ -43,11 +53,21 @@ public class Controller : NetworkBehaviour
 
     Vector3 MovementControll()
     {
-        //斜め移動と縦横の移動を同じ速度にするためにVector3をNormalize()する。
-        var moving = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
-        moving.Normalize();
-        moving = moving * speed;
-        return moving;
+        if (joystick != null)
+        {
+            var moving = new Vector3(-joystick.Horizontal, 0, -joystick.Vertical);
+            moving.Normalize();
+            moving = moving * speed;
+            return moving;
+        }
+        else
+        {
+            //斜め移動と縦横の移動を同じ速度にするためにVector3をNormalize()する。
+            var moving = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
+            moving.Normalize();
+            moving = moving * speed;
+            return moving;
+        }
     }
 
     public void RotateToMovingDirection()
