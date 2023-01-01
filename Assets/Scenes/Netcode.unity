@@ -1160,7 +1160,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   RunInBackground: 1
-  LogLevel: 1
+  LogLevel: 0
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 1113579808}
@@ -2125,8 +2125,9 @@ GameObject:
   - component: {fileID: 2018422885}
   - component: {fileID: 2018422884}
   - component: {fileID: 2018422883}
+  - component: {fileID: 2018422887}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: UIView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2219,6 +2220,23 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &2018422887
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2018422882}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7412c8a385685244c974bc653f0827d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  asHostButton: {fileID: 484267062}
+  asClientButton: {fileID: 2092075680}
+  ipaddressField: {fileID: 1528301876}
+  exitButton: {fileID: 579986263}
+  sphereButton: {fileID: 1073123313}
 --- !u!1 &2043683092
 GameObject:
   m_ObjectHideFlags: 0
@@ -2249,11 +2267,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 481e56db16ec04a9a9bd8d88551ff21b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  asHostButton: {fileID: 484267062}
-  asClientButton: {fileID: 2092075680}
-  ipaddress: {fileID: 1528301876}
-  exitButton: {fileID: 579986263}
-  sphereButton: {fileID: 1073123313}
+  UI: {fileID: 2018422887}
   joystick: {fileID: 1601881871}
   sphereObject: {fileID: 2789154892006714206, guid: baf88f6d9bd8d1940900e072d807cdb1, type: 3}
 --- !u!4 &2043683094

@@ -14,14 +14,8 @@ using Unity.VisualScripting;
 
 public class Main : NetworkBehaviour
 {
-    [SerializeField] Button? asHostButton;
-    [SerializeField] Button? asClientButton;
-    [SerializeField] TMP_InputField? ipaddress;
-
-    [SerializeField] Button? exitButton;
-    [SerializeField] Button? sphereButton;
+    [SerializeField] UIView? UI;
     [SerializeField] GameObject? joystick;
-
     [SerializeField] NetworkObject? sphereObject;
 
     string? addr = null;
@@ -50,17 +44,18 @@ public class Main : NetworkBehaviour
     private void Awake()
     {
         initAddress();
-        if (ipaddress != null)
+        if (UI != null)
         {
-            ipaddress.text = this.addr ?? "";
+            UI.Initialize(this.addr ?? "");
+            UI.Address.Subscribe(addr => {
+                this.addr = addr;
+            }).AddTo(this);
         }
     }
 
     void Start()
     {
-        if (asClientButton == null || asHostButton == null || ipaddress == null || exitButton == null
-            || sphereButton == null
-            || joystick == null)
+        if (joystick == null || UI == null)
         {
             Debug.LogError("Invalid Main Setup");
             return;
@@ -70,38 +65,26 @@ public class Main : NetworkBehaviour
         joystick.SetActive(false);
 #endif
 
-        asHostButton.OnClickAsObservable().Subscribe(_ => {
+        UI.OnStartAsHost.Subscribe(_ => {
             NetworkManager.Singleton.StartHost();
-            asClientButton.interactable = false;
         }).AddTo(this);
 
-        ipaddress.ObserveEveryValueChanged(i => i.text).Subscribe(text => {
-            this.addr = text;
-            this.asClientButton.interactable = !string.IsNullOrEmpty(this.addr);
-        }).AddTo(this);
-
-        var transport = NetworkManager.Singleton.NetworkConfig.NetworkTransport as UnityTransport;
-        if (transport == null || this.addr==null)
+        UI.OnStartAsClient.Subscribe(_ =>
         {
-            asClientButton.interactable = false;
-        }
-        else {
-            asClientButton.OnClickAsObservable().Subscribe(_ =>
+            var transport = NetworkManager.Singleton.NetworkConfig.NetworkTransport as UnityTransport;
+            if (transport != null)
             {
-                asHostButton.interactable = false;
                 transport.SetConnectionData(this.addr, 7777);
                 NetworkManager.Singleton.StartClient();
                 saveAddress();
-            }).AddTo(this);            
-        }
-
-        exitButton.OnClickAsObservable().Subscribe(_ => {
-            NetworkManager.Singleton.Shutdown();
-            asClientButton.interactable = true;
-            asHostButton.interactable = true;
+            }
         }).AddTo(this);
 
-        sphereButton.OnClickAsObservable().Subscribe(_ => {
+        UI.OnExit.Subscribe(_ => {
+            NetworkManager.Singleton.Shutdown();
+        }).AddTo(this);
+
+        UI.OnSphereCreated.Subscribe(_ => {
             CreateSphereServerRpc();
         }).AddTo(this);
     }
