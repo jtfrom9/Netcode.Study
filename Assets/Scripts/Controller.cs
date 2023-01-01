@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
-public class Controller : MonoBehaviour
+public class Controller : NetworkBehaviour
 {
     Rigidbody rigitbody;
     Vector3 moving, latestPos;
@@ -16,21 +17,37 @@ public class Controller : MonoBehaviour
 
     void Update()
     {
-        MovementControll();
-        Movement();
+        if (IsOwner)
+        {
+            this.moving = MovementControll();
+            SetMovingServerRpc(this.moving);
+        }
+        if(IsServer)
+        {
+            Movement();
+        }
     }
 
     void FixedUpdate()
     {
-        RotateToMovingDirection();
+        if (IsOwner)
+        {
+            RotateToMovingDirection();
+        }
     }
 
-    void MovementControll()
+    [ServerRpc]
+    void SetMovingServerRpc(Vector3 v) {
+        this.moving = v;
+    }
+
+    Vector3 MovementControll()
     {
         //斜め移動と縦横の移動を同じ速度にするためにVector3をNormalize()する。
-        moving = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
+        var moving = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
         moving.Normalize();
         moving = moving * speed;
+        return moving;
     }
 
     public void RotateToMovingDirection()
